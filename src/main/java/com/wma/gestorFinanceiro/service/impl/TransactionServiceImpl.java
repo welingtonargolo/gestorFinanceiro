@@ -2,13 +2,14 @@ package com.wma.gestorFinanceiro.service.impl;
 
 import com.wma.gestorFinanceiro.api.dto.transaction.TransactionRequest;
 import com.wma.gestorFinanceiro.api.dto.transaction.TransactionResponse;
+import com.wma.gestorFinanceiro.domain.entity.Account;
 import com.wma.gestorFinanceiro.domain.entity.Category;
 import com.wma.gestorFinanceiro.domain.entity.Transaction;
 import com.wma.gestorFinanceiro.domain.entity.User;
+import com.wma.gestorFinanceiro.domain.repository.AccountRepository;
 import com.wma.gestorFinanceiro.domain.repository.CategoryRepository;
 import com.wma.gestorFinanceiro.domain.repository.TransactionRepository;
 import com.wma.gestorFinanceiro.domain.repository.UserRepository;
-import com.wma.gestorFinanceiro.exception.BusinessException;
 import com.wma.gestorFinanceiro.exception.ResourceNotFoundException;
 import com.wma.gestorFinanceiro.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -26,13 +27,14 @@ public class TransactionServiceImpl implements TransactionService {
     private final TransactionRepository transactionRepository;
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-
+    private final AccountRepository accountRepository; // Adicionada dependência
 
     @Override
     @Transactional
     public TransactionResponse createTransaction(TransactionRequest request, String userEmail) {
         User user = findUserByEmail(userEmail);
         Category category = findCategoryByIdAndUser(request.categoryId(), user.getId());
+        Account account = findAccountByIdAndUser(request.accountId(), user.getId()); // Nova validação
 
         Transaction transaction = Transaction.builder()
                 .description(request.description())
@@ -41,6 +43,7 @@ public class TransactionServiceImpl implements TransactionService {
                 .type(request.type())
                 .user(user)
                 .category(category)
+                .account(account) // Associar conta
                 .build();
 
         Transaction savedTransaction = transactionRepository.save(transaction);
@@ -63,12 +66,14 @@ public class TransactionServiceImpl implements TransactionService {
         User user = findUserByEmail(userEmail);
         Transaction transaction = findTransactionByIdAndUser(transactionId, user.getId());
         Category category = findCategoryByIdAndUser(request.categoryId(), user.getId());
+        Account account = findAccountByIdAndUser(request.accountId(), user.getId()); // Nova validação
 
         transaction.setDescription(request.description());
         transaction.setAmount(request.amount());
         transaction.setDate(request.date());
         transaction.setType(request.type());
         transaction.setCategory(category);
+        transaction.setAccount(account); // Atualizar conta
 
         Transaction updatedTransaction = transactionRepository.save(transaction);
         return toTransactionResponse(updatedTransaction);
@@ -90,7 +95,13 @@ public class TransactionServiceImpl implements TransactionService {
     private Category findCategoryByIdAndUser(Long categoryId, Long userId) {
         return categoryRepository.findById(categoryId)
                 .filter(category -> category.getUser().getId().equals(userId))
-                .orElseThrow(() -> new BusinessException("Categoria não encontrada ou não pertence ao utilizador."));
+                .orElseThrow(() -> new ResourceNotFoundException("Categoria não encontrada ou não pertence ao utilizador."));
+    }
+
+    private Account findAccountByIdAndUser(Long accountId, Long userId) {
+        return accountRepository.findById(accountId)
+                .filter(account -> account.getUser().getId().equals(userId))
+                .orElseThrow(() -> new ResourceNotFoundException("Conta não encontrada ou não pertence ao utilizador."));
     }
 
     private Transaction findTransactionByIdAndUser(Long transactionId, Long userId) {
@@ -107,7 +118,10 @@ public class TransactionServiceImpl implements TransactionService {
                 transaction.getDate(),
                 transaction.getType(),
                 transaction.getCategory().getId(),
-                transaction.getCategory().getName()
+                transaction.getCategory().getName(),
+                transaction.getAccount().getId(), // Adicionado ID da conta
+                transaction.getAccount().getName()  // Adicionado nome da conta
         );
     }
 }
+

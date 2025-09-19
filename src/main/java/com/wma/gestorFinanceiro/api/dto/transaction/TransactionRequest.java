@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+
 public record TransactionRequest(
     @NotBlank(message = "A descrição é obrigatória")
     @Size(min = 3, max = 100, message = "A descrição deve ter entre 3 e 100 caracteres")
@@ -25,6 +26,10 @@ public record TransactionRequest(
     TransactionType type,
 
     @NotNull(message = "O ID da categoria é obrigatório")
-    Long categoryId
+    Long categoryId,
+
+    @NotNull(message = "O ID da conta é obrigatório")
+    Long accountId
 ) {
 }
+

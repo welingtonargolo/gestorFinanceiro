@@ -1,6 +1,5 @@
 package com.wma.gestorFinanceiro.domain.entity;
 
-import com.wma.gestorFinanceiro.domain.enums.TransactionType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -16,41 +15,28 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "transactions")
-public class Transaction {
+@Table(name = "budgets", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"user_id", "category_id", "monthYear"})
+})
+public class Budget {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String description;
-
-    @NotNull
+    @NotNull(message = "O valor do orçamento é obrigatório")
     @Column(nullable = false)
     private BigDecimal amount;
 
-    @NotNull
+    @NotNull(message = "O mês/ano do orçamento é obrigatório")
     @Column(nullable = false)
-    private LocalDate date;
-
-    @NotNull
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private TransactionType type;
+    private LocalDate monthYear; // Armazenará o primeiro dia do mês do orçamento
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    // --- CORREÇÃO ---
-    // Adicionar a relação com a Account
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "account_id", nullable = false)
-    private Account account;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 }
-

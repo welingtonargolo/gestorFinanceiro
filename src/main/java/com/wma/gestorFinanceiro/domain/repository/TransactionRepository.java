@@ -24,7 +24,7 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
                                                       @Param("startDate") LocalDate startDate,
                                                       @Param("endDate") LocalDate endDate);
                                                       
-    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.user.id = :userId AND t.category.id = :categoryId AND t.type = com.wma.gestorFinanceiro.domain.enums.TransactionType.EXPENSE AND t.date BETWEEN :startDate AND :endDate")
+    @Query("SELECT COALESCE(SUM(t.amount), 0) FROM Transaction t WHERE t.user.id = :userId AND t.category.id = :categoryId AND t.type = com.wma.gestorFinanceiro.domain.enums.TransactionType.DESPESA AND t.date BETWEEN :startDate AND :endDate")
     BigDecimal sumExpensesByCategoryIdAndDateBetween(@Param("userId") Long userId,
                                                      @Param("categoryId") Long categoryId,
                                                      @Param("startDate") LocalDate startDate,

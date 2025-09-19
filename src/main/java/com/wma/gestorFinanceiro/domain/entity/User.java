@@ -4,46 +4,74 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import org.hibernate.annotations.CreationTimestamp;
-import java.time.LocalDateTime;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-@Entity
-@Table(name = "users")
+import java.util.Collection;
+
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class User {
+@Entity
+@Table(name = "users")
+public class User implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NotBlank(message = "O nome é obrigatório")
-    @Size(min = 3, max = 100)
+    @Size(min = 2, max = 100, message = "O nome deve ter entre 2 e 100 caracteres")
     @Column(nullable = false, length = 100)
     private String name;
 
-    @Email(message = "Formato de e-mail inválido")
     @NotBlank(message = "O e-mail é obrigatório")
-    @Column(nullable = false, unique = true, length = 150)
+    @Email(message = "Formato de e-mail inválido")
+    @Column(nullable = false, unique = true, length = 100)
     private String email;
 
     @NotBlank(message = "A senha é obrigatória")
-    @Size(min = 6, message = "A senha deve ter no mínimo 6 caracteres")
+    @Size(min = 6, message = "A senha deve ter pelo menos 6 caracteres")
     @Column(nullable = false)
     private String password;
 
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-    
-    // Futuramente, adicionaremos o relacionamento com a entidade Couple
-    // @ManyToOne
-    // @JoinColumn(name = "couple_id")
-    // private Couple couple;
+    // --- Métodos UserDetails ---
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // No futuro, podemos implementar roles (ex: ROLE_USER, ROLE_ADMIN)
+        return null;
+    }
+
+    @Override
+    public String getUsername() {
+        // O nosso "username" para fins de autenticação é o e-mail
+        return this.email;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }
+

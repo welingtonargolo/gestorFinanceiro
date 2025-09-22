@@ -2,6 +2,7 @@ package com.wma.gestorFinanceiro.api.controller;
 
 import com.wma.gestorFinanceiro.api.dto.auth.LoginRequest;
 import com.wma.gestorFinanceiro.api.dto.auth.LoginResponse;
+import com.wma.gestorFinanceiro.api.dto.auth.RefreshTokenRequest;
 import com.wma.gestorFinanceiro.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +28,12 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
         LoginResponse response = authService.login(loginRequest);
         return ResponseEntity.ok(response);
+    }
+
+    
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refreshToken(@RequestBody @Valid RefreshTokenRequest request) {
+        System.out.println("Recebido refresh token: " + request.refreshToken());
+        return ResponseEntity.ok(authService.refreshToken(request.refreshToken()));
     }
 }

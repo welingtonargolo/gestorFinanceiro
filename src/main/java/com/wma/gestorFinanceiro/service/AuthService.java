@@ -10,4 +10,6 @@ public interface AuthService {
      * @return O DTO de resposta contendo o token de acesso.
      */
     LoginResponse login(LoginRequest loginRequest);
+    LoginResponse refreshToken(String refreshToken);
+
 }
